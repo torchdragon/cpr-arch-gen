@@ -1,7 +1,6 @@
 package builder
 
-import roll3d6
-import rollD6
+import builder.behavior.Dice
 
 object ArchitectureSource {
 
@@ -30,7 +29,7 @@ object ArchitectureSource {
                 5 to listOf(Encounterable.Wisp),
                 6 to listOf(Encounterable.Killer)
             ),
-            rollD6)
+            Dice.rollD6)
 
         object Basic : Difficulty(
             DIFFICULTY_BASIC,
@@ -52,7 +51,7 @@ object ArchitectureSource {
                 17 to listOf(Encounterable.Wisp, Encounterable.Wisp, Encounterable.Wisp),
                 18 to listOf(Encounterable.Liche)
             ),
-            roll3d6)
+            Dice.roll3d6)
 
         object Standard : Difficulty(
             DIFFICULTY_STANDARD,
@@ -73,7 +72,7 @@ object ArchitectureSource {
                 16 to listOf(Encounterable.Asp),
                 17 to listOf(Encounterable.Raven, Encounterable.Raven, Encounterable.Raven),
                 18 to listOf(Encounterable.Liche, Encounterable.Raven)
-            ), roll3d6)
+            ), Dice.roll3d6)
 
         object Uncommon : Difficulty(
             DIFFICULTY_UNCOMMON,
@@ -94,7 +93,7 @@ object ArchitectureSource {
                 16 to listOf(Encounterable.Asp, Encounterable.Raven),
                 17 to listOf(Encounterable.Dragon, Encounterable.Wisp),
                 18 to listOf(Encounterable.Giant)
-            ), roll3d6)
+            ), Dice.roll3d6)
 
         object Advanced : Difficulty(
             DIFFICULTY_ADVANCED,
@@ -115,10 +114,10 @@ object ArchitectureSource {
                 16 to listOf(Encounterable.Kraken),
                 17 to listOf(Encounterable.Raven, Encounterable.Wisp, Encounterable.Hellhound),
                 18 to listOf(Encounterable.Dragon, Encounterable.Dragon)
-            ), roll3d6)
+            ), Dice.roll3d6)
 
         fun get(): List<Encounterable> {
-            return source.getOrElse(resolver(), { DEFAULT })
+            return source.getOrElse(resolver()) { DEFAULT }
         }
     }
 }

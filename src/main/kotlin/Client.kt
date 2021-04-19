@@ -1,5 +1,5 @@
+import builder.ArchitectureBuilder
 import builder.ArchitectureSource
-import builder.Floor
 import kotlinx.html.div
 import kotlinx.html.dom.append
 import kotlinx.browser.document
@@ -10,28 +10,25 @@ import kotlinx.dom.removeClass
 import kotlinx.html.InputType
 import kotlinx.html.js.*
 import org.w3c.dom.*
-import kotlin.random.Random
 
 fun main() {
-    window.onload = { document.body?.initialize() }
+    window.onload = {
+        document.body?.initialize()
+        generateAndDisplay(null)
+    }
 }
 
-const val DEFAULT_FLOORS = 10
-val rollD6 = { Random.nextInt(1, 6) }
-val roll3d6 = { rollD6() + rollD6() + rollD6() }
-
-val floors = mutableListOf<Floor>()
+val archBuilder = ArchitectureBuilder()
+val difficultyElements: MutableList<HTMLButtonElement> = mutableListOf()
 
 var floorInput : HTMLInputElement? = null
 var architectureRoot : HTMLElement? = null
-var currentDifficulty: ArchitectureSource.Difficulty = ArchitectureSource.Difficulty.Basic
-var difficultyElements: MutableList<HTMLButtonElement> = mutableListOf()
 
 fun HTMLElement.initialize() {
     append {
         div {
             ArchitectureSource.availableDifficulties.forEach { difficulty ->
-                button(classes = if (difficulty == currentDifficulty) "difficulty-selected" else "difficulty" ) {
+                button(classes = if (difficulty == archBuilder.currentDifficulty) "difficulty-selected" else "difficulty" ) {
                     +difficulty.label
                     onClickFunction = {
                         updateDifficulties(difficulty)
@@ -45,13 +42,11 @@ fun HTMLElement.initialize() {
             button {
                 +"Full Generate"
                 onClickFunction = {
-                    floorInput?.value = roll3d6().toString()
-                    generateAndDisplay(floorInput?.value?.toIntOrNull())
+                    generateAndDisplay(null)
                 }
             }
             floorInput = input {
                 type = InputType.number
-                value = DEFAULT_FLOORS.toString()
             }
             button {
                 +"Generate"
@@ -60,39 +55,24 @@ fun HTMLElement.initialize() {
                 }
             }
         }
-        architectureRoot = div {
-
-        }
+        architectureRoot = div { }
     }
 }
 
 private fun generateAndDisplay(floorCount: Int?) {
-    floors.clear()
-    floors.addAll(generateArchitecture(floorCount ?: DEFAULT_FLOORS))
+    archBuilder.generate(floorCount)
+    floorInput?.value = archBuilder.floors.size.toString()
     architectureRoot?.displayArchitecture()
 }
 
 private fun updateDifficulties(difficulty: ArchitectureSource.Difficulty) {
-    currentDifficulty = difficulty
+    archBuilder.currentDifficulty = difficulty
     difficultyElements.forEach {
         it.removeClass("difficulty")
         it.removeClass("difficulty-selected")
         if (it.textContent == difficulty.label) {
             it.addClass("difficulty-selected")
         }
-    }
-}
-
-fun generateArchitecture(floorCount: Int): List<Floor> {
-    return (1 .. floorCount).map { level ->
-        Floor(
-            level,
-            if (level < 3) {
-                ArchitectureSource.Difficulty.Lobby.get()
-            } else {
-                currentDifficulty.get()
-            }
-        )
     }
 }
 
@@ -111,7 +91,7 @@ fun HTMLElement.displayArchitecture() {
                 }
             }
             tbody {
-                floors.forEach { floor ->
+                archBuilder.floors.forEach { floor ->
                     floor.render(this)
                 }
             }
